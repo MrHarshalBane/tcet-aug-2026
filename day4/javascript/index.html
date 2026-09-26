@@ -2,7 +2,7 @@
 //CW3: WAP to create random jackpot number and take input from user to guess the number. Based on level, the attempt to guess the number should change
 //Medium – 10 attempts
 
-jackpot = 73
+jackpot = Math.floor(Math.random() * 100) + 1
 
 for(i = 1; i <= 10; i++) {
     guess = prompt("Guess a number:")
