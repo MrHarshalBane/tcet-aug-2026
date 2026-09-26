@@ -1,0 +1,12 @@
+<input type="text" id="num" value="5">
+<button onclick="getSqr()">Click Me</button>
+<div id="result">This will be updated</div>
+<script>
+function getSqr() {
+    x = document.getElementById("num").value
+    sqr = x * x
+    output = `Square of ${x} is ${x * x}`
+    document.getElementById("result").innerHTML = output
+}
+
+</script>
