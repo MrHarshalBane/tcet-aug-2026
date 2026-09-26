@@ -5,6 +5,8 @@ counter = 0
 
 setInterval(() => {
     document.body.style.backgroundColor = colors[counter++]
+    if(counter == 4)
+        counter = 0
 }, 1000)
 
 </script>
