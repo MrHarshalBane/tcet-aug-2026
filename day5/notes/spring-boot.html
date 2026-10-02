@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring Boot & MySQL Notes</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+            color: #333;
+            scroll-behavior: smooth;
+        }
+        .sidebar {
+            width: 250px;
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            overflow-y: auto;
+            position: fixed;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+        .sidebar h2 {
+            margin-top: 0;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid #34495e;
+            padding-bottom: 10px;
+        }
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+        .sidebar ul li {
+            margin-bottom: 10px;
+        }
+        .sidebar ul li a {
+            color: #bdc3c7;
+            text-decoration: none;
+            display: block;
+            padding: 8px;
+            border-radius: 4px;
+            transition: background 0.3s, color 0.3s;
+        }
+        .sidebar ul li a:hover {
+            background-color: #34495e;
+            color: #fff;
+        }
+        .content {
+            margin-left: 250px;
+            flex-grow: 1;
+            padding: 40px 60px;
+            background-color: #f4f7f6;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        .section {
+            background: #fff;
+            padding: 30px;
+            margin-bottom: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #689f38; /* Spring Green */
+            padding-bottom: 10px;
+            margin-top: 0;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #558b2f;
+            margin-top: 0;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        h3 {
+            color: #34495e;
+            margin-top: 25px;
+        }
+        p {
+            line-height: 1.6;
+        }
+        pre {
+            background-color: #272822;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        code {
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .keyword { color: #f92672; font-weight: bold; }
+        .string { color: #e6db74; }
+        .comment { color: #75715e; }
+        .annotation { color: #fd971f; }
+        
+        /* Smooth scrolling for anchor links */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Copy Button Styles */
+        pre {
+            position: relative;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #689f38;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        pre:hover .copy-btn {
+            opacity: 1;
+        }
+        .copy-btn:hover {
+            background-color: #558b2f;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <h2>Topics</h2>
+        <ul>
+            <li><a href="#setup">1. Project Setup</a></li>
+            <li><a href="#properties">2. application.properties</a></li>
+            <li><a href="#server-setup">3. Single File App</a></li>
+            <li><a href="#run">4. Run the Application</a></li>
+            <li><a href="#diagrams">5. Sequence Diagrams</a></li>
+        </ul>
+    </div>
+
+    <div class="content">
+        <h1>Spring Boot, Data JPA & MySQL Notes</h1>
+
+        <div id="setup" class="section">
+            <h2>1. Project Setup (Spring Initializr)</h2>
+            <p>Generate a new Spring Boot project from <a href="https://start.spring.io/" target="_blank">Spring Initializr</a> with the following dependencies:</p>
+            <ul>
+                <li><strong>Spring Web:</strong> For building RESTful web applications.</li>
+                <li><strong>Spring Data JPA:</strong> For database operations and ORM.</li>
+                <li><strong>MySQL Driver:</strong> To connect to your MySQL database.</li>
+            </ul>
+        </div>
+
+        <div id="properties" class="section">
+            <h2>2. application.properties Configuration</h2>
+            <p>Add the following configurations in your <code>src/main/resources/application.properties</code> file to connect to your MySQL database named <code>company</code>.</p>
+            <pre><code><span class="comment"># Database Connection</span>
+spring.datasource.url=jdbc:mysql://localhost:3306/company
+spring.datasource.username=root
+spring.datasource.password=password
+
+<span class="comment"># Hibernate & JPA properties</span>
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true</code></pre>
+        </div>
+
+        <div id="server-setup" class="section">
+            <h2>3. Create Single File Application</h2>
+            <p>You can create a minimal setup by putting your Entity, Repository, Controller, and the Main class all in one file named <code>DemoApplication.java</code>.</p>
+            <pre><code>package com.example.demo;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import jakarta.persistence.*;
+import java.util.List;
+
+<span class="annotation">@SpringBootApplication</span>
+public class DemoApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(DemoApplication.class, args);
+    }
+}
+
+<span class="comment">// --- 1. ENTITY ---</span>
+<span class="annotation">@Entity</span>
+<span class="annotation">@Table</span>(name = "employees")
+class Employee {
+    <span class="annotation">@Id</span>
+    <span class="annotation">@GeneratedValue</span>(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String name;
+    private String department;
+    private Integer salary;
+
+    <span class="comment">// Getters and Setters</span>
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    public String getDepartment() { return department; }
+    public void setDepartment(String department) { this.department = department; }
+    public Integer getSalary() { return salary; }
+    public void setSalary(Integer salary) { this.salary = salary; }
+}
+
+<span class="comment">// --- 2. REPOSITORY ---</span>
+interface EmployeeRepository extends JpaRepository&lt;Employee, Long&gt; {}
+
+<span class="comment">// --- 3. REST CONTROLLER ---</span>
+<span class="annotation">@RestController</span>
+<span class="annotation">@RequestMapping</span>("/api/employees")
+<span class="annotation">@CrossOrigin</span>(origins = "*") <span class="comment">// Enable CORS for all origins</span>
+class EmployeeController {
+
+    <span class="annotation">@Autowired</span>
+    private EmployeeRepository repository;
+
+    <span class="comment">// Create a New Employee</span>
+    <span class="annotation">@PostMapping</span>
+    public Employee createEmployee(<span class="annotation">@RequestBody</span> Employee employee) {
+        return repository.save(employee);
+    }
+
+    <span class="comment">// Get All Employees</span>
+    <span class="annotation">@GetMapping</span>
+    public List&lt;Employee&gt; getAllEmployees() {
+        return repository.findAll();
+    }
+
+    <span class="comment">// Get a Single Employee by ID</span>
+    <span class="annotation">@GetMapping</span>("/{id}")
+    public ResponseEntity&lt;Employee&gt; getEmployeeById(<span class="annotation">@PathVariable</span> Long id) {
+        return repository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    <span class="comment">// Update an Employee</span>
+    <span class="annotation">@PutMapping</span>("/{id}")
+    public ResponseEntity&lt;Employee&gt; updateEmployee(<span class="annotation">@PathVariable</span> Long id, <span class="annotation">@RequestBody</span> Employee employeeDetails) {
+        return repository.findById(id).map(employee -> {
+            employee.setName(employeeDetails.getName());
+            employee.setDepartment(employeeDetails.getDepartment());
+            employee.setSalary(employeeDetails.getSalary());
+            return ResponseEntity.ok(repository.save(employee));
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
+    <span class="comment">// Delete an Employee</span>
+    <span class="annotation">@DeleteMapping</span>("/{id}")
+    public ResponseEntity&lt;Void&gt; deleteEmployee(<span class="annotation">@PathVariable</span> Long id) {
+        if (repository.existsById(id)) {
+            repository.deleteById(id);
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
+}</code></pre>
+        </div>
+
+        <div id="run" class="section">
+            <h2>4. Run the Application</h2>
+            <p>To run your Spring Boot application, open the VS Code terminal (<kbd>Ctrl</kbd> + <kbd>`</kbd>) in your project directory (where the <code>pom.xml</code> is located) and execute:</p>
+            <pre><code><span class="comment"># Using Maven Wrapper (Linux/Mac)</span>
+./mvnw spring-boot:run
+
+<span class="comment"># Using Maven Wrapper (Windows)</span>
+mvnw spring-boot:run</code></pre>
+            <p>Your server will now be running on <code>http://localhost:8080</code>.</p>
+        </div>
+
+        <div id="diagrams" class="section">
+            <h2>5. Sequence Diagrams</h2>
+            <p>Below are the sequence diagrams for each CRUD operation in Spring Boot.</p>
+            
+            <h3>Create (Add Employee)</h3>
+            <div class="mermaid">
+sequenceDiagram
+    participant Client
+    participant Controller
+    participant Repository
+    participant Database
+    Client->>Controller: POST /api/employees (JSON)
+    Controller->>Repository: save(employee)
+    Repository->>Database: INSERT INTO employees
+    Database-->>Repository: Result (ID)
+    Repository-->>Controller: Saved Employee Object
+    Controller-->>Client: 200 OK (JSON)
+            </div>
+
+            <h3>Read All (Get Employees)</h3>
+            <div class="mermaid">
+sequenceDiagram
+    participant Client
+    participant Controller
+    participant Repository
+    participant Database
+    Client->>Controller: GET /api/employees
+    Controller->>Repository: findAll()
+    Repository->>Database: SELECT * FROM employees
+    Database-->>Repository: List of records
+    Repository-->>Controller: List&lt;Employee&gt;
+    Controller-->>Client: 200 OK (JSON array)
+            </div>
+
+            <h3>Read Single (Get Employee by ID)</h3>
+            <div class="mermaid">
+sequenceDiagram
+    participant Client
+    participant Controller
+    participant Repository
+    participant Database
+    Client->>Controller: GET /api/employees/:id
+    Controller->>Repository: findById(id)
+    Repository->>Database: SELECT * FROM employees WHERE id = ?
+    Database-->>Repository: Employee record (Optional)
+    Repository-->>Controller: Optional&lt;Employee&gt;
+    Controller-->>Client: 200 OK or 404 Not Found
+            </div>
+
+            <h3>Update (Edit Employee)</h3>
+            <div class="mermaid">
+sequenceDiagram
+    participant Client
+    participant Controller
+    participant Repository
+    participant Database
+    Client->>Controller: PUT /api/employees/:id (JSON)
+    Controller->>Repository: findById(id)
+    Repository->>Database: SELECT * FROM employees WHERE id = ?
+    Database-->>Repository: Employee record
+    Controller->>Repository: save(updatedEmployee)
+    Repository->>Database: UPDATE employees SET ...
+    Database-->>Repository: Result
+    Repository-->>Controller: Saved Employee Object
+    Controller-->>Client: 200 OK (JSON) or 404 Not Found
+            </div>
+
+            <h3>Delete (Remove Employee)</h3>
+            <div class="mermaid">
+sequenceDiagram
+    participant Client
+    participant Controller
+    participant Repository
+    participant Database
+    Client->>Controller: DELETE /api/employees/:id
+    Controller->>Repository: existsById(id)
+    Repository->>Database: SELECT COUNT(*) WHERE id = ?
+    Database-->>Repository: exists (boolean)
+    Controller->>Repository: deleteById(id)
+    Repository->>Database: DELETE FROM employees WHERE id = ?
+    Database-->>Repository: Result
+    Controller-->>Client: 200 OK or 404 Not Found
+            </div>
+        </div>
+
+    </div>
+
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+    </script>
+    <script>
+        document.querySelectorAll('pre').forEach(pre => {
+            const button = document.createElement('button');
+            button.innerText = 'Copy';
+            button.className = 'copy-btn';
+            
+            button.addEventListener('click', () => {
+                const code = pre.querySelector('code').innerText;
+                navigator.clipboard.writeText(code).then(() => {
+                    button.innerText = 'Copied!';
+                    setTimeout(() => button.innerText = 'Copy', 2000);
+                }).catch(err => {
+                    console.error('Failed to copy text: ', err);
+                });
+            });
+            
+            pre.appendChild(button);
+        });
+    </script>
+</body>
+</html>

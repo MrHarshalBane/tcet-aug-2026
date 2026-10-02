@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Node.js, Express & MySQL Notes</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+            color: #333;
+            scroll-behavior: smooth;
+        }
+        .sidebar {
+            width: 250px;
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            overflow-y: auto;
+            position: fixed;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+        .sidebar h2 {
+            margin-top: 0;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid #34495e;
+            padding-bottom: 10px;
+        }
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+        .sidebar ul li {
+            margin-bottom: 10px;
+        }
+        .sidebar ul li a {
+            color: #bdc3c7;
+            text-decoration: none;
+            display: block;
+            padding: 8px;
+            border-radius: 4px;
+            transition: background 0.3s, color 0.3s;
+        }
+        .sidebar ul li a:hover {
+            background-color: #34495e;
+            color: #fff;
+        }
+        .content {
+            margin-left: 250px;
+            flex-grow: 1;
+            padding: 40px 60px;
+            background-color: #f4f7f6;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        .section {
+            background: #fff;
+            padding: 30px;
+            margin-bottom: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+            margin-top: 0;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #2980b9;
+            margin-top: 0;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        h3 {
+            color: #34495e;
+            margin-top: 25px;
+        }
+        p {
+            line-height: 1.6;
+        }
+        pre {
+            background-color: #272822;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        code {
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .keyword { color: #f92672; font-weight: bold; }
+        .string { color: #e6db74; }
+        .comment { color: #75715e; }
+        
+        /* Smooth scrolling for anchor links */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Copy Button Styles */
+        pre {
+            position: relative;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        pre:hover .copy-btn {
+            opacity: 1;
+        }
+        .copy-btn:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <h2>Topics</h2>
+        <ul>
+            <li><a href="#setup">1. Project Setup</a></li>
+            <li><a href="#db-schema">2. Database & Table</a></li>
+            <li><a href="#insert-data">3. Insert Queries</a></li>
+            <li><a href="#server-setup">4. Create app.js File</a></li>
+            <li><a href="#run">5. Run the Application</a></li>
+            <li><a href="#diagrams">6. Sequence Diagrams</a></li>
+        </ul>
+    </div>
+
+    <div class="content">
+        <h1>Node.js, Express & MySQL Notes</h1>
+
+        <div id="setup" class="section">
+            <h2>1. Project Setup</h2>
+            <p>First, initialize a new Node.js project and install the necessary dependencies (Express framework and MySQL driver).</p>
+            <pre><code>npm init -y
+npm install express mysql2 cors
+npm install --save-dev nodemon</code></pre>
+        </div>
+
+        <div id="db-schema" class="section">
+            <h2>2. Database & Table Creation</h2>
+            <p>Connect to your MySQL server (via CLI or GUI like MySQL Workbench/phpMyAdmin) and execute the following SQL to create the <code>company</code> database and the <code>employees</code> table.</p>
+            <pre><code><span class="keyword">CREATE DATABASE</span> company;
+<span class="keyword">USE</span> company;
+
+<span class="keyword">CREATE TABLE</span> employees (
+    id <span class="keyword">INT AUTO_INCREMENT PRIMARY KEY</span>,
+    name <span class="keyword">VARCHAR</span>(100) <span class="keyword">NOT NULL</span>,
+    department <span class="keyword">VARCHAR</span>(50) <span class="keyword">NOT NULL</span>,
+    salary <span class="keyword">INT NOT NULL</span>
+);</code></pre>
+        </div>
+
+        <div id="insert-data" class="section">
+            <h2>3. Insert Data (10 Indian Employees)</h2>
+            <p>Run this query to populate the <code>employees</code> table with sample data.</p>
+            <pre><code><span class="keyword">INSERT INTO</span> employees (name, department, salary) <span class="keyword">VALUES</span>
+(<span class="string">'Aarav Sharma'</span>, <span class="string">'Engineering'</span>, 85000),
+(<span class="string">'Priya Patel'</span>, <span class="string">'Human Resources'</span>, 60000),
+(<span class="string">'Rahul Verma'</span>, <span class="string">'Marketing'</span>, 70000),
+(<span class="string">'Sneha Desai'</span>, <span class="string">'Finance'</span>, 90000),
+(<span class="string">'Vikram Singh'</span>, <span class="string">'Engineering'</span>, 95000),
+(<span class="string">'Ananya Gupta'</span>, <span class="string">'Sales'</span>, 65000),
+(<span class="string">'Rohan Mehra'</span>, <span class="string">'IT Support'</span>, 55000),
+(<span class="string">'Neha Reddy'</span>, <span class="string">'Marketing'</span>, 72000),
+(<span class="string">'Karan Joshi'</span>, <span class="string">'Engineering'</span>, 88000),
+(<span class="string">'Pooja Iyer'</span>, <span class="string">'Finance'</span>, 92000);</code></pre>
+        </div>
+
+        <div id="server-setup" class="section">
+            <h2>4. Create Single app.js File</h2>
+            <p>Create a single file named <code>app.js</code> and add the following code to set up the Express server, connect to MySQL, and define the CRUD API routes all in one place.</p>
+            <pre><code>const express = require('express');
+const mysql = require('mysql2');
+const cors = require('cors');
+
+const app = express();
+app.use(cors()); // Enable CORS for all origins
+app.use(express.json()); // Middleware to parse JSON bodies
+
+<span class="comment">// MySQL Connection Configuration</span>
+const db = mysql.createConnection({
+    host: 'localhost',
+    port: 3306, <span class="comment">// Default MySQL port</span>
+    user: 'root', <span class="comment">// Replace with your MySQL username</span>
+    password: 'password', <span class="comment">// Replace with your MySQL password</span>
+    database: 'company'
+});
+
+<span class="comment">// Connect to the database</span>
+db.connect((err) => {
+    if (err) {
+        console.error('Error connecting to MySQL:', err);
+        return;
+    }
+    console.log('Successfully connected to the MySQL database.');
+});
+
+<span class="comment">// --- API ROUTES ---</span>
+
+<span class="comment">// Get All Employees (GET /api/employees)</span>
+app.get('/api/employees', (req, res) => {
+    const sql = 'SELECT * FROM employees';
+    db.query(sql, (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(results);
+    });
+});
+
+<span class="comment">// Add a New Employee (POST /api/employees)</span>
+app.post('/api/employees', (req, res) => {
+    const { name, department, salary } = req.body;
+    const sql = 'INSERT INTO employees (name, department, salary) VALUES (?, ?, ?)';
+    
+    db.query(sql, [name, department, salary], (err, result) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.status(201).json({ 
+            message: 'Employee added successfully',
+            employeeId: result.insertId 
+        });
+    });
+});
+
+<span class="comment">// Get a Single Employee by ID (GET /api/employees/:id)</span>
+app.get('/api/employees/:id', (req, res) => {
+    const sql = 'SELECT * FROM employees WHERE id = ?';
+    db.query(sql, [req.params.id], (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (results.length === 0) return res.status(404).json({ message: 'Employee not found' });
+        res.json(results[0]);
+    });
+});
+
+<span class="comment">// Update an Employee (PUT /api/employees/:id)</span>
+app.put('/api/employees/:id', (req, res) => {
+    const { name, department, salary } = req.body;
+    const sql = 'UPDATE employees SET name = ?, department = ?, salary = ? WHERE id = ?';
+    db.query(sql, [name, department, salary, req.params.id], (err, result) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (result.affectedRows === 0) return res.status(404).json({ message: 'Employee not found' });
+        res.json({ message: 'Employee updated successfully' });
+    });
+});
+
+<span class="comment">// Delete an Employee (DELETE /api/employees/:id)</span>
+app.delete('/api/employees/:id', (req, res) => {
+    const sql = 'DELETE FROM employees WHERE id = ?';
+    db.query(sql, [req.params.id], (err, result) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (result.affectedRows === 0) return res.status(404).json({ message: 'Employee not found' });
+        res.json({ message: 'Employee deleted successfully' });
+    });
+});
+
+<span class="comment">// Start the server</span>
+const PORT = 3000;
+app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+});</code></pre>
+        </div>
+
+
+
+        <div id="run" class="section">
+            <h2>5. Run the Application</h2>
+            <p>To run your Node.js application, open the VS Code terminal (<kbd>Ctrl</kbd> + <kbd>`</kbd>) in your project directory and execute either of the following commands:</p>
+            <pre><code><span class="comment"># Using Node (Restart manually on changes)</span>
+node app.js
+
+<span class="comment"># Using Nodemon (Auto-restarts on changes)</span>
+nodemon app.js</code></pre>
+            <p>Your server will now be running on <code>http://localhost:3000</code>.</p>
+        </div>
+
+        <div id="diagrams" class="section">
+            <h2>6. Sequence Diagrams</h2>
+            <p>Below are the sequence diagrams for each CRUD operation.</p>
+            
+            <h3>Create (Add Employee)</h3>
+            <div class="mermaid">
+sequenceDiagram
+    participant Client
+    participant Server
+    participant MySQL
+    Client->>Server: POST /api/employees (name, dept, salary)
+    Server->>MySQL: INSERT INTO employees
+    MySQL-->>Server: Result (insertId)
+    Server-->>Client: 201 Created (employeeId)
+            </div>
+
+            <h3>Read All (Get Employees)</h3>
+            <div class="mermaid">
+sequenceDiagram
+    participant Client
+    participant Server
+    participant MySQL
+    Client->>Server: GET /api/employees
+    Server->>MySQL: SELECT * FROM employees
+    MySQL-->>Server: Array of employees
+    Server-->>Client: 200 OK (JSON array)
+            </div>
+
+            <h3>Read Single (Get Employee by ID)</h3>
+            <div class="mermaid">
+sequenceDiagram
+    participant Client
+    participant Server
+    participant MySQL
+    Client->>Server: GET /api/employees/:id
+    Server->>MySQL: SELECT * FROM employees WHERE id = ?
+    MySQL-->>Server: Employee record (if found)
+    Server-->>Client: 200 OK (JSON object) or 404 Not Found
+            </div>
+
+            <h3>Update (Edit Employee)</h3>
+            <div class="mermaid">
+sequenceDiagram
+    participant Client
+    participant Server
+    participant MySQL
+    Client->>Server: PUT /api/employees/:id (new data)
+    Server->>MySQL: UPDATE employees SET ... WHERE id = ?
+    MySQL-->>Server: Result (affectedRows)
+    Server-->>Client: 200 OK (updated) or 404 Not Found
+            </div>
+
+            <h3>Delete (Remove Employee)</h3>
+            <div class="mermaid">
+sequenceDiagram
+    participant Client
+    participant Server
+    participant MySQL
+    Client->>Server: DELETE /api/employees/:id
+    Server->>MySQL: DELETE FROM employees WHERE id = ?
+    MySQL-->>Server: Result (affectedRows)
+    Server-->>Client: 200 OK (deleted) or 404 Not Found
+            </div>
+        </div>
+
+    </div>
+
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+    </script>
+    <script>
+        document.querySelectorAll('pre').forEach(pre => {
+            const button = document.createElement('button');
+            button.innerText = 'Copy';
+            button.className = 'copy-btn';
+            
+            button.addEventListener('click', () => {
+                const code = pre.querySelector('code').innerText;
+                navigator.clipboard.writeText(code).then(() => {
+                    button.innerText = 'Copied!';
+                    setTimeout(() => button.innerText = 'Copy', 2000);
+                }).catch(err => {
+                    console.error('Failed to copy text: ', err);
+                });
+            });
+            
+            pre.appendChild(button);
+        });
+    </script>
+</body>
+</html>
