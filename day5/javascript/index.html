@@ -1,34 +1,41 @@
 
-    <h1>Users List</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Login</th>
-                <th>Avatar</th>
-            </tr>
-        </thead>
-        <tbody id="users-list">
-            
-        </tbody>
-    </table>
+<h1>Users List</h1>
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Login</th>
+            <th>Avatar</th>
+        </tr>
+    </thead>
+    <tbody id="users-list">
+        
+    </tbody>
+</table>
+
+
+
+
+
+
 
 <script>
-    fetch("https://api.github.com/users")
-        .then((res) => res.json())
-        .then((data) => {
-            output = ""
-            for(i = 0; i < data.length; i++){
-                output += 
-                "<tr>"
-                + "<td>" + data[i].id + "</td>"
-                + "<td>" + data[i].login + "</td>"
-                + "<td>" + `<img src = ${data[i].avatar_url} width = 100>` + "</td>"
-                + "</tr>";
-            }
-            document.getElementById("users-list").innerHTML = output;
-        });
+fetch("https://api.github.com/users")
+.then((res) => res.json())
+.then((data) => {
+    output = ""
+    for(i = 0; i < data.length; i++){
+        output += 
+        "<tr>"
+        + "<td>" + data[i].id + "</td>"
+        + "<td>" + data[i].login + "</td>"
+        + "<td>" + `<img src = ${data[i].avatar_url} width = 100>` + "</td>"
+        + "</tr>";
+    }
+    document.getElementById("users-list").innerHTML = output;
+});
 </script>
+
 
 <!-- 
 Open this index.html with Live server
