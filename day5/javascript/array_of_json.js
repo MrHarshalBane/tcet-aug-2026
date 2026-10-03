@@ -5,7 +5,7 @@ emps = [
 ]
 
 console.log(emps);
-//Total salary
+
 total_salary = 0;
 for(i = 0; i < emps.length; i++)
     total_salary = total_salary + emps[i].salary;
